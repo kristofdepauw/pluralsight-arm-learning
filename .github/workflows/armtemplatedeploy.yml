@@ -30,12 +30,34 @@ jobs:
         with:
           creds: ${{secrets.AZURE_CREDENTIALS}}
 
-      - name: Azure CLI Action
-        uses: Azure/cli@v1
-        with:
-          inlinescript: |
-            az deployment sub create --location "Australia East" --template-file ./arm-templates/resourcegroup.json
+#     - name: Azure CLI Action
+#        uses: Azure/cli@v1
+#        with:
+#          inlinescript: |
+#            az deployment sub create --location "Australia East" --template-file ./arm-templates/resourcegroup.json
 
+      
+      - name: Deploy Resource Group rg-githubactions
+        uses: Azure/arm-deploy@v1
+        with:
+          scope: subscription
+          subscriptionId: fc8ca091-b4e9-41b0-80c8-78a114ed75a8
+          region: Australia East
+          template: ./arm-templates/resourcegroup.json
+          deploymentName: rg-githubactions
+          
+      - name: Deploy Storage Account
+        uses: Azure/arm-deploy@v1
+        with:
+          scope: resourcegroup
+          resourceGroupName: rg-githubactions
+          subscriptionId: fc8ca091-b4e9-41b0-80c8-78a114ed75a8
+          template: ./arm-templates/storageaccount.json
+          parameters: 
+            ./arm-templates/storageaccount.parameters.json
+            storageAccountName=golostg65653214
+            location="Australia East"
+          deploymentMode: incremental
 
 
 
