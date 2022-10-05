@@ -5,8 +5,8 @@ name: armTemplateDeployment
 # Controls when the workflow will run
 on:
   # Triggers the workflow on push or pull request events but only for the "main" branch
-  #push:
-   # branches: [ "main" ]
+  push:
+    branches: [ "main" ]
   #pull_request:
    # branches: [ "main" ]
 
@@ -29,6 +29,12 @@ jobs:
         uses: Azure/login@v1
         with:
           creds: ${{secrets.AZURE_CREDENTIALS}}
+
+      - name: Azure CLI Action
+        uses: Azure/cli@v1
+        with:
+          inlinescript: |
+            az deployment sub create --location "Australia East" --template-file ./arm-templates/resourcegroup.json
 
 
 
