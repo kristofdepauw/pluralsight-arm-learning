@@ -13,17 +13,20 @@ on:
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 env:
-  resource_group_name: rg-githubactions
-  location: West Europe
   subscriptionId: fc8ca091-b4e9-41b0-80c8-78a114ed75a8
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
   # This workflow contains a single job called "build"
-  armDeploy:
+  armDeployStaging:
+    name: Deploy to Staging
     # The type of runner that the job will run on
     runs-on: ubuntu-latest
 
+    env:
+      resource_group_name: rg-stg-githubactions
+      location: West Europe
+    environment: staging
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
@@ -65,6 +68,77 @@ jobs:
             #./arm-templates/storageaccount.parameters.json can be used as well
             sku=Standard_LRS
             storageAccountName=golostg65653214
+            location="${{env.location}}"
+          deploymentMode: incremental
+
+      #azure t- run: echo ${{steps.storageAccountDeploy.outputs.BlobUri}}
+
+      - name: Deploy Virtual Machine
+        uses: Azure/arm-deploy@v1
+        with:
+          scope: resourcegroup
+          resourceGroupName: ${{env.resource_group_name}}
+          subscriptionId: ${{env.subscriptionId}}
+          template: ./arm-templates/virtualmachine.json
+          parameters: 
+            #./arm-templates/storageaccount.parameters.json can be used as well
+            adminPassword=${{secrets.UBUNTU_ADMIN_PASSWORD}}
+            location="${{env.location}}"
+          deploymentMode: incremental
+
+  armDeployProduction:
+    name: Deploy to Producton
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+
+    env:
+      resource_group_name: rg-prod-githubactions
+      location: North Europe
+    environment: production
+
+    needs: armDeployStaging
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v3
+
+      - name: Azure Login
+        uses: Azure/login@v1
+        with:
+          creds: ${{secrets.AZURE_CREDENTIALS}}
+
+  #     - name: Azure CLI Action
+  #        uses: Azure/cli@v1
+  #        with:
+  #          inlinescript: |
+  #            az deployment sub create --location "Australia East" --template-file ./arm-templates/resourcegroup.json
+
+      
+      - name: Deploy Resource Group ${{env.resource_group_name}}
+        uses: Azure/arm-deploy@v1
+        with:
+          scope: subscription
+          subscriptionId: ${{env.subscriptionId}}
+          region: Australia East
+          template: ./arm-templates/resourcegroup.json
+          parameters:
+            location="${{env.location}}"
+            resourceGroupName=${{env.resource_group_name}}
+          deploymentName: ${{env.resource_group_name}}
+          
+      - name: Deploy Storage Account
+        uses: Azure/arm-deploy@v1
+        id: storageAccountDeploy
+        with:
+          scope: resourcegroup
+          resourceGroupName: ${{env.resource_group_name}}
+          subscriptionId: ${{env.subscriptionId}}
+          template: ./arm-templates/storageaccount.json
+          parameters: 
+            #./arm-templates/storageaccount.parameters.json can be used as well
+            sku=Standard_LRS
+            storageAccountName=golostg656532142
             location="${{env.location}}"
           deploymentMode: incremental
 
