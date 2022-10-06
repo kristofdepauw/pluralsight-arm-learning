@@ -14,7 +14,7 @@ on:
   workflow_dispatch:
 env:
   resource_group_name: rg-githubactions
-  location: "West Europe"
+  location: West Europe
   subscriptionId: fc8ca091-b4e9-41b0-80c8-78a114ed75a8
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
@@ -49,7 +49,7 @@ jobs:
           region: Australia East
           template: ./arm-templates/resourcegroup.json
           parameters:
-            location=${{env.location}}
+            location="${{env.location}}"
             resourceGroupName=${{env.resource_group_name}}
           deploymentName: ${{env.resource_group_name}}
           
@@ -65,7 +65,7 @@ jobs:
             #./arm-templates/storageaccount.parameters.json can be used as well
             sku=Standard_LRS
             storageAccountName=golostg65653214
-            location=${{env.location}}
+            location="${{env.location}}"
           deploymentMode: incremental
 
       #azure t- run: echo ${{steps.storageAccountDeploy.outputs.BlobUri}}
@@ -80,5 +80,5 @@ jobs:
           parameters: 
             #./arm-templates/storageaccount.parameters.json can be used as well
             adminPassword=${{secrets.UBUNTU_ADMIN_PASSWORD}}
-            location=${{env.location}}
+            location="${{env.location}}"
           deploymentMode: incremental
