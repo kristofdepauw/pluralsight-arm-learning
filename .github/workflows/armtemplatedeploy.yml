@@ -45,7 +45,7 @@ jobs:
           region: Australia East
           template: ./arm-templates/resourcegroup.json
           parameters:
-            location="Australia East"
+            location="West Europe"
             resourceGroupName=rg-githubactions
           deploymentName: rg-githubactions
           
@@ -61,7 +61,7 @@ jobs:
             #./arm-templates/storageaccount.parameters.json can be used as well
             sku=Standard_LRS
             storageAccountName=golostg65653214
-            location="Australia East"
+            location="West Europe"
           deploymentMode: incremental
 
       #azure t- run: echo ${{steps.storageAccountDeploy.outputs.BlobUri}}
@@ -76,4 +76,5 @@ jobs:
           parameters: 
             #./arm-templates/storageaccount.parameters.json can be used as well
             adminPassword=${{secrets.UBUNTU_ADMIN_PASSWORD}}
+            location="West Europe"
           deploymentMode: incremental
